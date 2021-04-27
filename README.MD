@@ -3,9 +3,9 @@ i plan to update this in to a proper guide one day
 
 
 Steps:
-Enable switchable graphics and direct output mode (and virtualisation features) in bios
-boot in to fresh install of ubuntu 21.04 with kernel parameters "intel_iommu=on kvm.ignore_msrs=1" added to GRUB_CMDLINE_LINUX_DEFAULT in /etc/default/gub
-bind GPU and HDMI audio to VFIO using bind-gpu-vfio.sh
-unbind GPU and HDMI audio from VFIO and rescan using remove-rescan.sh
-bind HDMI audio to VFIO using bind-HDMI_audio-vfio.sh
 
+1. Enable switchable graphics and direct output mode (and virtualisation features) in bios**
+2. boot in to fresh install of ubuntu 21.04 with kernel parameters "intel_iommu=on kvm.ignore_msrs=1" added to GRUB_CMDLINE_LINUX_DEFAULT in /etc/default/gub**
+3. bind GPU and HDMI audio to VFIO using bind-gpu-vfio.sh**
+4. unbind GPU and HDMI audio from VFIO and rescan using remove-rescan.sh**
+5. bind HDMI audio to VFIO using bind-HDMI_audio-vfio.sh**
