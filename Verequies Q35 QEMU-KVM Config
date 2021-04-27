@@ -1,0 +1,77 @@
+	sudo ip link add virbr1 type bridge
+	sudo ip addr add 192.168.2.254/24 dev virbr1
+	sudo ip tuntap add tap1 mode tap user hamish
+	sudo ip link set tap1 master virbr1
+	sudo dnsmasq --interface=virbr1 --bind-interfaces --dhcp-range=192.168.2.1,192.168.2.50
+	sudo ip link set tap1 up
+	sudo ip link set virbr1 up
+
+	sudo GPU vfio
+	#hw:3,0 default
+	#Get AC97 perfect
+	sudo QEMU_AUDIO_DRV=pa \
+		QEMU_AUDIO_TIMER_PERIOD=1000 \
+		QEMU_PA_BUFFER_SIZE_OUT=1024 \
+		QEMU_PA_BUFFER_SIZE_IN=1024 \
+		QEMU_PA_TLENGTH=1024 \
+		QEMU_PA_FRAGSIZE=256 \
+		QEMU_PA_MAXLENGTH_IN=256 \
+		qemu-system-x86_64 \
+		-name Windows_10_Enterprise_x64 \
+		-machine q35,accel=kvm,kernel_irqchip=on,mem-merge=off,vmport=off \
+		-cpu host,kvm=off,hv_spinlocks=0x1fff,hv_relaxed,hv_vapic,hv_time,hv_crash,hv_reset,hv_vpindex,hv_runtime,hv_synic,hv_stimer,hv_vendor_id=Verequies \
+		-smp sockets=1,cores=4,threads=1 \
+		-vcpu vcpunum=0,affinity=2 \
+		-vcpu vcpunum=1,affinity=3 \
+		-vcpu vcpunum=2,affinity=6 \
+		-vcpu vcpunum=3,affinity=7 \
+		-drive file=/home/verequies/Documents/EFI-Firmware/OVMF_CODE_Testing.fd,if=pflash,format=raw,unit=0,readonly=on \
+		-drive file=/home/verequies/Documents/EFI-Firmware/OVMF_VARS_Testing.fd,if=pflash,format=raw,unit=1 \
+		-m size=8G \
+		-mem-path /dev/hugepages/qemu \
+		-mem-prealloc \
+		-realtime mlock=off \
+		-nodefaults \
+		-nographic \
+		-enable-kvm \
+		-msg timestamp=on \
+		-rtc base=localtime,clock=host,driftfix=none \
+		-boot menu=off,strict=on \
+		-global kvm-pit.lost_tick_policy=discard \
+		-global ICH9-LPC.disable_s3=1 \
+		-global ICH9-LPC.disable_s4=1 \
+		-device ioh3420,chassis=1,bus=pcie.0,addr=01.0,id=ioh3420-root-port-1 \
+		-device vfio-pci,host=01:00.0,bus=ioh3420-root-port-1,addr=00.0,multifunction=on,id=host-device-0 \
+		-device vfio-pci,host=01:00.1,bus=ioh3420-root-port-1,addr=00.1,id=host-device-1 \
+		-device ioh3420,chassis=2,bus=pcie.0,addr=02.0,id=ioh3420-root-port-2 \
+		-device virtio-scsi-pci,bus=ioh3420-root-port-2,addr=00.0,id=virtio-pci-scsi-0 \
+		-drive file=/dev/disk/by-id/ata-Hitachi_HDS723030ALA640_MK0311YHG0BSEA,format=raw,if=none,id=virtio-scsi-disk-0,cache=none,aio=native \
+		-device scsi-hd,drive=virtio-scsi-disk-0 \
+		-device ioh3420,chassis=3,bus=pcie.0,addr=03.0,id=ioh3420-root-port-3 \
+		-device ich9-ahci,bus=ioh3420-root-port-3,addr=00.0,id=ich9-ahci-0 \
+		-drive file=/home/verequies/Documents/ISO-Images/en-gb_windows_10_multi-edition_vl_version_1709_updated_sept_2017_x64_dvd_100090748.iso,format=raw,if=none,media=cdrom,id=sata-cd-0,readonly=on \
+		-device ide-cd,bus=ich9-ahci-0.0,drive=sata-cd-0 \
+		-drive file=/home/verequies/Documents/ISO-Images/virtio-win-0.1.141.iso,format=raw,if=none,media=cdrom,id=sata-cd-1,readonly=on \
+		-device ide-cd,bus=ich9-ahci-0.1,drive=sata-cd-1 \
+		-device ioh3420,chassis=4,bus=pcie.0,addr=04.0,id=ioh3420-root-port-4 \
+		-device nec-usb-xhci,bus=ioh3420-root-port-4,addr=00.0,id=nec-usb-xhci-0 \
+		-device usb-host,bus=nec-usb-xhci-0.0,hostbus=3,hostaddr=2 \
+		-device ioh3420,chassis=5,bus=pcie.0,addr=05.0,id=ioh3420-root-port-5 \
+		-device ich9-intel-hda,bus=ioh3420-root-port-5,addr=00.0,id=ich9-intel-hda-0 \
+		-device hda-duplex,bus=ich9-intel-hda-0.0,cad=0 \
+		-device ioh3420,chassis=6,bus=pcie.0,addr=06.0,id=ioh3420-root-port-6 \
+		-netdev user,hostfwd=udp::2046-10.0.2.15:2046,id=host-network-0 \
+		-device virtio-net-pci,netdev=host-network-0,mac=46:21:83:0D:59:3F,bus=ioh3420-root-port-6,addr=00.0 \
+		-device ioh3420,chassis=7,bus=pcie.0,addr=07.0,id=ioh3420-root-port-7 \
+		-netdev tap,ifname=tap1,script=no,id=host-network-1 \
+		-device virtio-net-pci,netdev=host-network-1,mac=12:66:8A:07:D2:82,bus=ioh3420-root-port-7,addr=00.0 \
+		-device ioh3420,chassis=8,bus=pcie.0,addr=08.0,id=ioh3420-root-port-8 \
+		-device virtio-balloon-pci,bus=ioh3420-root-port-8,addr=00.0,id=virtio-balloon-pci-0 \
+		-chardev stdio,mux=on,id=monitor-0 \
+		-mon chardev=monitor-0 \
+
+	sudo GPU off
+
+	sudo ip link del tap1
+	sudo ip link del virbr1
+	sudo killall -9 dnsmasq
