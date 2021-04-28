@@ -11,6 +11,8 @@ https://arseniyshestakov.com/2016/03/31/how-to-pass-gpu-to-vm-and-back-without-x
 
 https://github.com/bryansteiner/gpu-passthrough-tutorial/
 
+https://passthroughpo.st/simple-per-vm-libvirt-hooks-with-the-vfio-tools-hook-helper/
+
 https://github.com/QaidVoid/Complete-Single-GPU-Passthrough#vbios-patching
 
 https://www.reddit.com/r/VFIO/comments/modwuh/experiencespotentially_a_guide_gvt_dgpu/
