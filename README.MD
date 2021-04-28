@@ -2,12 +2,12 @@ place Holder / Note to self with all the information i used to Passthrough a Nvi
 i plan to update this in to a proper guide one day
 
 
-Steps:
+Steps for Kubnuntu / probably other Debian based distros:
 
 1. Enable switchable graphics and direct output mode (and virtualisation features) in bios**
 2. boot in to fresh install of ubuntu 21.04 with kernel parameters "intel_iommu=on kvm.ignore_msrs=1" added to GRUB_CMDLINE_LINUX_DEFAULT in /etc/default/gub**
 3. sudo update-grub**
-4. sudo apt install libvirt-daemon-system libvirt-clients qemu-kvm qemu-utils qemu-efi virt-manager ovmf**
+4. sudo apt install libvirt-daemon-system libvirt-clients qemu-kvm qemu-utils qemu-efi virt-manager ovmf libhugetlbfs-bin**
 5. sudo nano /etc/initramfs-tools/modules  and add**
 
           kvm
