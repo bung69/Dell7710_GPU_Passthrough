@@ -18,3 +18,6 @@ https://github.com/QaidVoid/Complete-Single-GPU-Passthrough#vbios-patching
 https://www.reddit.com/r/VFIO/comments/modwuh/experiencespotentially_a_guide_gvt_dgpu/
 
 https://libvirt.org/kbase/virtiofs.html
+
+Enable MSI for increased performance
+https://github.com/cardi/qemu-windows-10
