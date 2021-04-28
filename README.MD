@@ -7,7 +7,7 @@ Steps for Kubnuntu / probably other Debian based distros:
 1. Enable switchable graphics and direct output mode (and virtualisation features) in bios**
 2. boot in to fresh install of ubuntu 21.04 with kernel parameters "intel_iommu=on kvm.ignore_msrs=1" added to GRUB_CMDLINE_LINUX_DEFAULT in /etc/default/gub**
 3. sudo update-grub**
-4. sudo apt install libvirt-daemon-system libvirt-clients qemu-kvm qemu-utils qemu-efi virt-manager ovmf libhugetlbfs-bin**
+4. sudo apt install libvirt-daemon-system libvirt-clients qemu-kvm qemu-utils qemu-efi virt-manager ovmf **
 5. sudo nano /etc/initramfs-tools/modules  and add**
 
           kvm
@@ -94,3 +94,13 @@ Replace with
 31.  TADA! 
 
   
+
+Enableing Hugepages ( From bryansteiner)
+ 1. sudo apt install libhugetlbfs-bin**
+ 2. Add VFIO-Tools Hook Helper**
+
+                   $ mkdir /etc/libvirt/hooks
+                   $ sudo wget 'https://raw.githubusercontent.com/PassthroughPOST/VFIO-Tools/master/libvirt_hooks/qemu' \
+                     -O /etc/libvirt/hooks/qemu
+                   $ sudo chmod +x /etc/libvirt/hooks/qemu
+                   $ sudo service libvirtd restart
