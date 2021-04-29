@@ -21,3 +21,5 @@ https://libvirt.org/kbase/virtiofs.html
 
 Enable MSI for increased performance
 https://github.com/cardi/qemu-windows-10
+
+disable driver binding https://www.heiko-sieger.info/blacklisting-graphics-driver/#Using_the_driver_override_feature
