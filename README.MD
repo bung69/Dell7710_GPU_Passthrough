@@ -1,13 +1,14 @@
-place Holder / Note to self with all the information i used to Passthrough a Nvidia Quadro m5000m on a Dell Precision 7710.
-i plan to update this in to a proper guide one day
+Dell Precision 7710 with Nvidia Quadro m500m VFIO GPU passthrough using Kubnuntu / probably other Debian based distros.
+
+Should also be posible with non Quadro GPUs either without looking glass and using an external display or using a dummy HDMI device and not using external displays.  Please let me know if it is posible to load EEID for non Quadro GPU's or if its posible to spoof the device id of the equivlent quadro card to allow installing quadro drivers in to the VM and get around these limitations. 
 
 
-Steps for Dell Precision 7710 VFIO GPU passthrough using Kubnuntu / probably other Debian based distros:
+Steps:
 
-1. *Optional* if using a Quadro dGPU, boot in to windows and use Nvida control pannel to save the EEID of the laptop screen and any external moniters that will be used.**
-2. Enable switchable graphics, direct output mode and virtualisation features in bios.**
-3. Boot in to fresh install of ubuntu 21.04 or simmiler.**
-4. Use "lspci -nn | grep 01:00." to find the pci bus number Vendor ID and model ID of your dGPU and assosiated hardware. For the Dell 7710 the GPU pci bus number is 01:00.0 and its assostiated Audio device is 01:00.1.   The Vendor and model ID's are inside the square brackets, [10de:13f8] and [10de:0fbb]. If there are more devices assosiated with the dGPU such as a usb controler, note the vendor and model IDs also.**
+1. Boot in to windows and use Nvida control panel to save the EEID of the laptop screen and any external moniters that may be used. Alternativly use the EEID file in this repo if sutable.
+2. Enable switchable graphics, direct output mode and virtualisation features in bios.
+3. Boot in to fresh install of ubuntu 21.04 or simmiler.
+4. Use "lspci -nn | grep 01:00." to find the pci bus number Vendor ID and model ID of your dGPU and assosiated hardware. For the Dell 7710 the GPU pci bus number is 01:00.0 and its assostiated Audio device is 01:00.1.   The Vendor and model ID's are inside the square brackets, [10de:13f8] and [10de:0fbb]. If there are more devices assosiated with the dGPU such as a usb controler, note the vendor and model IDs also.
 
           $ lspci -nnk
           
@@ -15,7 +16,7 @@ Steps for Dell Precision 7710 VFIO GPU passthrough using Kubnuntu / probably oth
           01:00.1 Audio device [0403]: NVIDIA Corporation GM204 High Definition Audio Controller [10de:0fbb] (rev a1)
           
           
-5. Add kernel parameters "intel_iommu=on kvm.ignore_msrs=1 vfio_pci.ids=10de:13f8,10de:0fbb" added to GRUB_CMDLINE_LINUX_DEFAULT in /etc/default/gub, replacing the vfio_pci.ids with your ID's from step 4**
+5. Add kernel parameters "intel_iommu=on kvm.ignore_msrs=1 vfio_pci.ids=10de:13f8,10de:0fbb" added to GRUB_CMDLINE_LINUX_DEFAULT in /etc/default/gub, replacing the vfio_pci.ids with your ID's from step 4
 
           $ sudo nano /etc/default/grub
           
@@ -33,15 +34,15 @@ Steps for Dell Precision 7710 VFIO GPU passthrough using Kubnuntu / probably oth
 
 
 
-6. Update Grub:**
+6. Update Grub:
 
           $ sudo update-grub
           
-7. Install packages used for virtualisation:**
+7. Install packages used for virtualisation:
 
           $ sudo apt install libvirt-daemon-system libvirt-clients qemu-kvm qemu-utils qemu-efi virt-manager ovmf
 
-8. Enable kernal modules for virtualisation and VFIO:**
+8. Enable kernal modules for virtualisation and VFIO:
 
           $ sudo nano /etc/initramfs-tools/modules
           
@@ -54,12 +55,15 @@ Steps for Dell Precision 7710 VFIO GPU passthrough using Kubnuntu / probably oth
           vhost-net
 
 
-6. Update initramfs 
+9. Update initramfs 
 
           $ sudo update-initramfs -u**
           
-9. *Optional* install propriotory nvidia drivers and then do sudo prime-select intel and reboot.**
-10. Dump nvidia GPU Vbios to a location accesible by libvirt:**
+10. Install propriotory nvidia drivers and then prime-select intel and reboot.
+
+          $ sudo prime-select intel
+          
+11. Dump nvidia GPU Vbios to a location accesible by libvirt:
 
           sudo -i
           mkdir /usr/share/vgabios
@@ -67,11 +71,13 @@ Steps for Dell Precision 7710 VFIO GPU passthrough using Kubnuntu / probably oth
           cat /sys/bus/pci/devices/0000:01:00.0/rom > /usr/share/vgabios/dgpu_vbios.rom
           echo 0 > /sys/bus/pci/devices/0000:01:00.0/rom
 
-11. copy SSDT_BAT.dat to /usr/share/vgabios/ ( good location as libvirt can access this location) **
-12. bind GPU and HDMI audio to VFIO using bind-gpu-vfio.sh**
-15. create VM using virtmanger,  with usual recomended settings for high performance VN ( cpu pinning virtio network, disks etc ) **
-16. add PCI device for nvidia GPU**
-17. allow edit xml preference and select overview > XML to editand add the folowing**
+12. Copy SSDT_BAT.dat to /usr/share/vgabios/ ( good location as libvirt can access this location)
+
+13. If the Nvidia GPU will also be used with the host, remove any nvida and nouveau driver blacklists inside /etc/modprobe.d/ and /usr/lib/modprobe.d/ 
+
+15. Create VM using virtmanger,  with usual recomended settings for high performance VN ( cpu pinning virtio network, disks etc )
+16. add PCI device for nvidia GPU
+17. allow edit xml preference and select overview > XML to editand add the folowing
 
 At the top
   
@@ -118,8 +124,6 @@ Replace with
       </hostdev>
     
     
-21. unbind GPU and HDMI audio from VFIO and rescan using remove-rescan.sh**
-22. bind HDMI audio to VFIO using bind-HDMI_audio-vfio.sh**
 23. Start the VM, install windows etc install propritory nvidia drivers. connect external display,  use nvida control pannel to copy EEID information,  alternativly boot in to windows baremetal without gpu switching bios option and copy laptop displays EEID**
 24. Load EEID file again ( works kind of like a dummy HDMI plug?) **
 25. set up looking glass,  test rebooting VM withougt display attached.  looking glass should still work**
