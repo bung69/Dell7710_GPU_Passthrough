@@ -2,14 +2,49 @@ place Holder / Note to self with all the information i used to Passthrough a Nvi
 i plan to update this in to a proper guide one day
 
 
-Steps for Kubnuntu / probably other Debian based distros:
+Steps for Dell Precision 7710 VFIO GPU passthrough using Kubnuntu / probably other Debian based distros:
 
-1. Enable switchable graphics and direct output mode (and virtualisation features) in bios**
-2. boot in to fresh install of ubuntu 21.04 with kernel parameters "intel_iommu=on kvm.ignore_msrs=1" added to GRUB_CMDLINE_LINUX_DEFAULT in /etc/default/gub**
-3. sudo update-grub**
-4. sudo apt install libvirt-daemon-system libvirt-clients qemu-kvm qemu-utils qemu-efi virt-manager ovmf **
-5. sudo nano /etc/initramfs-tools/modules  and add**
+1. *Optional* if using a Quadro dGPU, boot in to windows and use Nvida control pannel to save the EEID of the laptop screen and any external moniters that will be used.**
+2. Enable switchable graphics, direct output mode and virtualisation features in bios.**
+3. Boot in to fresh install of ubuntu 21.04 or simmiler.**
+4. Use "lspci -nn | grep 01:00." to find the pci bus number Vendor ID and model ID of your dGPU and assosiated hardware. For the Dell 7710 the GPU pci bus number is 01:00.0 and its assostiated Audio device is 01:00.1.   The Vendor and model ID's are inside the square brackets, [10de:13f8] and [10de:0fbb]. If there are more devices assosiated with the dGPU such as a usb controler, note the vendor and model IDs also.**
 
+          $ lspci -nnk
+          
+          01:00.0 VGA compatible controller [0300]: NVIDIA Corporation GM204GLM [Quadro M5000M / M5000 SE] [10de:13f8] (rev a1)
+          01:00.1 Audio device [0403]: NVIDIA Corporation GM204 High Definition Audio Controller [10de:0fbb] (rev a1)
+          
+          
+5. Add kernel parameters "intel_iommu=on kvm.ignore_msrs=1 vfio_pci.ids=10de:13f8,10de:0fbb" added to GRUB_CMDLINE_LINUX_DEFAULT in /etc/default/gub, replacing the vfio_pci.ids with your ID's from step 4**
+
+          $ sudo nano /etc/default/grub
+          
+          # If you change this file, run 'update-grub' afterwards to update
+          # /boot/grub/grub.cfg.
+          # For full documentation of the options in this file, see:
+          #   info -f grub -n 'Simple configuration'
+
+          GRUB_DEFAULT=0
+          GRUB_TIMEOUT_STYLE=hidden
+          GRUB_TIMEOUT=10
+          GRUB_DISTRIBUTOR=`lsb_release -i -s 2> /dev/null || echo Debian`
+          GRUB_CMDLINE_LINUX_DEFAULT="quiet splash intel_iommu=on kvm.ignore_msrs=1 vfio_pci.ids=10de:13f8,10de:0fbb"
+          GRUB_CMDLINE_LINUX=""
+
+
+
+6. Update Grub:**
+
+          $ sudo update-grub
+          
+7. Install packages used for virtualisation:**
+
+          $ sudo apt install libvirt-daemon-system libvirt-clients qemu-kvm qemu-utils qemu-efi virt-manager ovmf
+
+8. Enable kernal modules for virtualisation and VFIO:**
+
+          $ sudo nano /etc/initramfs-tools/modules
+          
           kvm
           kvm_intel
           vfio
@@ -19,10 +54,12 @@ Steps for Kubnuntu / probably other Debian based distros:
           vhost-net
 
 
-6. sudo update-initramfs -u**
-7. install propriotory nvidia drivers and then do sudo prime-select intel and reboot**
-8. use iommu.sh to get device ID's  and edit IDs in bind-gpu-vfio.sh and bind-HDMI_audio-vfio.sh**
-9. do the folowing to get nvidia GPU Vbios:**
+6. Update initramfs 
+
+          $ sudo update-initramfs -u**
+          
+9. *Optional* install propriotory nvidia drivers and then do sudo prime-select intel and reboot.**
+10. Dump nvidia GPU Vbios to a location accesible by libvirt:**
 
           sudo -i
           mkdir /usr/share/vgabios
