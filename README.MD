@@ -10,14 +10,16 @@ Steps:
 3. Boot in to fresh install of kubuntu 21.04 or simmiler.
 4. Use "lspci -nn | grep 01:00." to find the pci bus number Vendor ID and model ID of your dGPU and assosiated hardware. For the Dell 7710 the GPU pci bus number is 01:00.0 and its assostiated Audio device is 01:00.1.   The Vendor and model ID's are inside the square brackets, [10de:13f8] and [10de:0fbb]. If there are more devices assosiated with the dGPU such as a usb controler, note the vendor and model IDs also.
 
-       $ lspci -nnk
+```
+$ lspci -nnk
 
-       01:00.0 VGA compatible controller [0300]: NVIDIA Corporation GM204GLM [Quadro M5000M / M5000 SE] [10de:13f8] (rev a1)
-       01:00.1 Audio device [0403]: NVIDIA Corporation GM204 High Definition Audio Controller [10de:0fbb] (rev a1)
-          
+01:00.0 VGA compatible controller [0300]: NVIDIA Corporation GM204GLM [Quadro M5000M / M5000 SE] [10de:13f8] (rev a1)
+01:00.1 Audio device [0403]: NVIDIA Corporation GM204 High Definition Audio Controller [10de:0fbb] (rev a1)
+```      
           
 5. Add kernel parameters "intel_iommu=on kvm.ignore_msrs=1 vfio_pci.ids=10de:13f8,10de:0fbb" added to GRUB_CMDLINE_LINUX_DEFAULT in /etc/default/gub, replacing the vfio_pci.ids with your ID's from step 4
 
+```
        $ sudo nano /etc/default/grub
 
        # If you change this file, run 'update-grub' afterwards to update
@@ -31,8 +33,7 @@ Steps:
        GRUB_DISTRIBUTOR=`lsb_release -i -s 2> /dev/null || echo Debian`
        GRUB_CMDLINE_LINUX_DEFAULT="quiet splash intel_iommu=on kvm.ignore_msrs=1 vfio_pci.ids=10de:13f8,10de:0fbb"
        GRUB_CMDLINE_LINUX=""
-
-
+```
 
 6. Update Grub:
 
