@@ -8,14 +8,21 @@ Steps:
 1. Boot in to windows and use Nvida control panel to save the EEID of the laptop screen and any external moniters that may be used. Alternativly use the EEID file in this repo if sutable.
 2. Enable switchable graphics, direct output mode and virtualisation features in bios.
 3. Boot in to fresh install of kubuntu 21.04 or simmiler.
-4. Use "lspci -nn | grep 01:00." to find the pci bus number Vendor ID and model ID of your dGPU and assosiated hardware. For the Dell 7710 the GPU pci bus number is 01:00.0 and its assostiated Audio device is 01:00.1.   The Vendor and model ID's are inside the square brackets, [10de:13f8] and [10de:0fbb]. If there are more devices assosiated with the dGPU such as a usb controler, note the vendor and model IDs also.
+4. Use ```lspci -nnk``` to find the pci bus number, sub-Vendor ID and  sub-device ID of your dGPU and assosiated hardware. For the Dell 7710 the GPU pci bus number is 01:00.0 and its assostiated Audio device is 01:00.1.   The sub Vendor and sub model ID's are inside the square brackets, on the second line for each device  [1028:06da] and [1028:06da]. If there are more devices assosiated with the dGPU such as a usb controler, note the vendor and model IDs also.
 
 ```
-$ lspci -nnk
+$ lspci -nnnk
 
 01:00.0 VGA compatible controller [0300]: NVIDIA Corporation GM204GLM [Quadro M5000M / M5000 SE] [10de:13f8] (rev a1)
+        Subsystem: Dell GM204GLM [Quadro M5000M / M5000 SE] **[1028:06da]**
+        Kernel driver in use: vfio-pci
+        Kernel modules: nvidiafb, nouveau
 01:00.1 Audio device [0403]: NVIDIA Corporation GM204 High Definition Audio Controller [10de:0fbb] (rev a1)
+        Subsystem: Dell GM204 High Definition Audio Controller **[1028:06da]**
+        Kernel driver in use: vfio-pci
+        Kernel modules: snd_hda_intel
 ```      
+x-pci-sub-vendor-id=0x1028,x-pci-sub-device-id=0x06da
           
 5. Add kernel parameters "intel_iommu=on kvm.ignore_msrs=1 vfio_pci.ids=10de:13f8,10de:0fbb" added to GRUB_CMDLINE_LINUX_DEFAULT in /etc/default/gub, replacing the vfio_pci.ids with your ID's from step 4
 
