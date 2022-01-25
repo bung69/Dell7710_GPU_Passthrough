@@ -38,7 +38,7 @@ x-pci-sub-vendor-id=0x1028,x-pci-sub-device-id=0x06da
        GRUB_TIMEOUT_STYLE=hidden
        GRUB_TIMEOUT=10
        GRUB_DISTRIBUTOR=`lsb_release -i -s 2> /dev/null || echo Debian`
-       GRUB_CMDLINE_LINUX_DEFAULT="quiet splash intel_iommu=on kvm.ignore_msrs=1 vfio_pci.ids=10de:13f8,10de:0fbb"
+       GRUB_CMDLINE_LINUX_DEFAULT="quiet splash intel_iommu=on kvm.ignore_msrs=1 vfio-pci.ids=10de:13f8,10de:0fbb"
        GRUB_CMDLINE_LINUX=""
 ```
 
